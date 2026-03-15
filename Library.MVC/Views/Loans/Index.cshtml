@@ -1,0 +1,68 @@
+@model IEnumerable<Library.Domain.Loan>
+
+@{
+    ViewData["Title"] = "Loans";
+}
+
+<h1>Loans</h1>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Create New Loan</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Book</th>
+            <th>Member</th>
+            <th>Loan Date</th>
+            <th>Due Date</th>
+            <th>Returned Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var loan in Model)
+        {
+            <tr class="@(loan.IsOverdue ? "table-danger" : "")">
+                <td>@loan.Book.Title</td>
+                <td>@loan.Member.FullName</td>
+                <td>@loan.LoanDate.ToString("MMM dd, yyyy")</td>
+                <td>@loan.DueDate.ToString("MMM dd, yyyy")</td>
+                <td>
+                    @if (loan.ReturnedDate.HasValue)
+                    {
+                        @loan.ReturnedDate.Value.ToString("MMM dd, yyyy")
+                    }
+                    else
+                    {
+                        <text>-</text>
+                    }
+                </td>
+                <td>
+                    @if (loan.ReturnedDate.HasValue)
+                    {
+                        <span class="badge bg-secondary">Returned</span>
+                    }
+                    else if (loan.IsOverdue)
+                    {
+                        <span class="badge bg-danger">Overdue</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                </td>
+                <td>
+                    @if (!loan.ReturnedDate.HasValue)
+                    {
+                        <form asp-action="MarkReturned" asp-route-id="@loan.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-success">Mark Returned</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
