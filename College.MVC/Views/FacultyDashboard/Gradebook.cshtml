@@ -1,0 +1,115 @@
+@model IEnumerable<College.Domain.AssignmentResult>
+
+@{
+    ViewData["Title"] = "Gradebook";
+    var courses = ViewBag.Courses as List<College.Domain.Course>;
+    var selectedCourseId = ViewBag.SelectedCourseId as int?;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gradebook</h1>
+        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Select Course</h5>
+            <form method="get" asp-action="Gradebook">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="courseId" class="form-label">Course</label>
+                        <select name="courseId" id="courseId" class="form-select" required>
+                            <option value="">-- Select a course --</option>
+                            @if (courses != null)
+                            {
+                                foreach (var course in courses)
+                                {
+                                    <option value="@course.Id" selected="@(selectedCourseId == course.Id)">@course.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">View Grades</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (selectedCourseId.HasValue)
+    {
+        @if (Model.Any())
+        {
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Assignment Results</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Assignment</th>
+                                    <th>Submission Date</th>
+                                    <th>Score</th>
+                                    <th>Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var result in Model)
+                                {
+                                    <tr>
+                                        <td>@result.StudentProfile?.Name</td>
+                                        <td>@result.Assignment?.Title</td>
+                                        <td>@(result.SubmittedDate?.ToString("MMM dd, yyyy") ?? "Not submitted")</td>
+                                        <td>
+                                            @if (result.Score > 0)
+                                            {
+                                                <span class="badge bg-@(result.Score >= 70 ? "success" : result.Score >= 50 ? "warning" : "danger")">
+                                                    @result.Score.ToString("F1")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Not graded</span>
+                                            }
+                                        </td>
+                                        <td>@result.Feedback</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-muted">
+                            Total Submissions: <strong>@Model.Count()</strong> |
+                            Graded: <strong>@Model.Count(r => r.Score > 0)</strong> |
+                            Pending: <strong>@Model.Count(r => r.Score == 0)</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <strong>No assignment results found.</strong>
+                <p class="mb-0">There are no assignment submissions for this course yet.</p>
+            </div>
+        }
+    }
+    else if (courses != null && courses.Any())
+    {
+        <div class="alert alert-secondary">
+            <i class="bi bi-info-circle"></i> Please select a course to view the gradebook.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <strong>No courses available.</strong>
+            <p class="mb-0">You don't have any courses assigned yet. Please contact the administrator.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,53 @@
+@model IEnumerable<College.Domain.Exam>
+
+@{
+    ViewData["Title"] = "Exams";
+}
+
+<h1>Exams</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Exam</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Course</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Max Score</th>
+            <th>Results Released</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.Course.Name</td>
+            <td>@item.Title</td>
+            <td>@item.Date.ToShortDateString()</td>
+            <td>@item.MaxScore</td>
+            <td>
+                @if (item.ResultsReleased)
+                {
+                    <span class="badge bg-success">Released</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">Provisional</span>
+                }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                @if (User.IsInRole("Admin") && !item.ResultsReleased)
+                {
+                    <form asp-action="ReleaseResults" asp-route-id="@item.Id" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-success">Release Results</button>
+                    </form>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

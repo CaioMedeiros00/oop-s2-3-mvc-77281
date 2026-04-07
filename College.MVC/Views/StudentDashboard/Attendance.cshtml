@@ -1,0 +1,47 @@
+@model IEnumerable<College.Domain.AttendanceRecord>
+
+@{
+    ViewData["Title"] = "My Attendance";
+}
+
+<h1>My Attendance Records</h1>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Week Number</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Model)
+            {
+                <tr>
+                    <td>@record.CourseEnrolment.Course.Name</td>
+                    <td>Week @record.WeekNumber</td>
+                    <td>@record.Date.ToShortDateString()</td>
+                    <td>
+                        @if (record.Present)
+                        {
+                            <span class="badge bg-success">Present</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Absent</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No attendance records yet.</p>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>

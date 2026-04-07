@@ -1,147 +1,136 @@
-using College.Domain;
 using College.MVC.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace College.MVC.Controllers
+namespace College.MVC.Controllers;
+
+[Authorize(Roles = "Faculty")]
+public class FacultyDashboardController : Controller
 {
-    [Authorize(Roles = "Faculty")]
-    public class FacultyDashboardController : Controller
+    private readonly ApplicationDbContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
+
+    public FacultyDashboardController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        _context = context;
+        _userManager = userManager;
+    }
 
-        public FacultyDashboardController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public async Task<IActionResult> Index()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var facultyProfile = await _context.FacultyProfiles
+            .FirstOrDefaultAsync(f => f.IdentityUserId == user.Id);
+
+        if (facultyProfile == null)
         {
-            _context = context;
-            _userManager = userManager;
+            return NotFound("Faculty profile not found.");
         }
 
-        public async Task<IActionResult> Index()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+        return View(facultyProfile);
+    }
 
-            var facultyProfile = await _context.FacultyProfiles
-                .Include(f => f.AssignedCourses)
+    public async Task<IActionResult> MyCourses()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var facultyProfile = await _context.FacultyProfiles
+            .FirstOrDefaultAsync(f => f.IdentityUserId == user.Id);
+
+        if (facultyProfile == null) return NotFound();
+
+        var courses = await _context.Courses
+            .Include(c => c.Branch)
+            .Where(c => c.FacultyProfileId == facultyProfile.Id)
+            .ToListAsync();
+
+        return View(courses);
+    }
+
+    public async Task<IActionResult> Students()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var facultyProfile = await _context.FacultyProfiles
+            .FirstOrDefaultAsync(f => f.IdentityUserId == user.Id);
+
+        if (facultyProfile == null) return NotFound();
+
+        var students = await _context.CourseEnrolments
+            .Include(e => e.StudentProfile)
+            .Include(e => e.Course)
+            .Where(e => e.Course.FacultyProfileId == facultyProfile.Id)
+            .Select(e => e.StudentProfile)
+            .Distinct()
+            .ToListAsync();
+
+        return View(students);
+    }
+
+    public async Task<IActionResult> StudentDetails(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var facultyProfile = await _context.FacultyProfiles
+            .FirstOrDefaultAsync(f => f.IdentityUserId == user.Id);
+
+        if (facultyProfile == null) return NotFound();
+
+        // Verify that this student is enrolled in one of the faculty's courses
+        var student = await _context.StudentProfiles
+            .Include(s => s.Enrolments)
+                .ThenInclude(e => e.Course)
                     .ThenInclude(c => c.Branch)
-                .FirstOrDefaultAsync(f => f.IdentityUserId == currentUser.Id);
+            .Include(s => s.AssignmentResults)
+                .ThenInclude(ar => ar.Assignment)
+            .Include(s => s.ExamResults)
+                .ThenInclude(er => er.Exam)
+            .FirstOrDefaultAsync(s => s.Id == id &&
+                s.Enrolments.Any(e => e.Course.FacultyProfileId == facultyProfile.Id));
 
-            if (facultyProfile == null)
-            {
-                return NotFound("Faculty profile not found.");
-            }
-
-            return View(facultyProfile);
-        }
-
-        public async Task<IActionResult> MyCourses()
+        if (student == null)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
-
-            var facultyProfile = await _context.FacultyProfiles
-                .Include(f => f.AssignedCourses)
-                    .ThenInclude(c => c.Branch)
-                .Include(f => f.AssignedCourses)
-                    .ThenInclude(c => c.Enrolments)
-                        .ThenInclude(e => e.StudentProfile)
-                .FirstOrDefaultAsync(f => f.IdentityUserId == currentUser.Id);
-
-            if (facultyProfile == null)
-            {
-                return NotFound("Faculty profile not found.");
-            }
-
-            return View(facultyProfile.AssignedCourses);
+            return NotFound("Student not found or not enrolled in your courses.");
         }
 
-        public async Task<IActionResult> Students(int? courseId)
+        return View(student);
+    }
+
+    public async Task<IActionResult> Gradebook(int? courseId)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var facultyProfile = await _context.FacultyProfiles
+            .FirstOrDefaultAsync(f => f.IdentityUserId == user.Id);
+
+        if (facultyProfile == null) return NotFound();
+
+        var courses = await _context.Courses
+            .Where(c => c.FacultyProfileId == facultyProfile.Id)
+            .ToListAsync();
+
+        ViewBag.Courses = courses;
+
+        if (courseId.HasValue)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+            var assignmentResults = await _context.AssignmentResults
+                .Include(r => r.Assignment)
+                .Include(r => r.StudentProfile)
+                .Where(r => r.Assignment.CourseId == courseId.Value)
+                .ToListAsync();
 
-            var facultyProfile = await _context.FacultyProfiles
-                .Include(f => f.AssignedCourses)
-                .FirstOrDefaultAsync(f => f.IdentityUserId == currentUser.Id);
-
-            if (facultyProfile == null)
-            {
-                return NotFound("Faculty profile not found.");
-            }
-
-            var courseIds = facultyProfile.AssignedCourses.Select(c => c.Id).ToList();
-
-            var query = _context.CourseEnrolments
-                .Include(ce => ce.StudentProfile)
-                .Include(ce => ce.Course)
-                .Where(ce => courseIds.Contains(ce.CourseId));
-
-            if (courseId.HasValue)
-            {
-                query = query.Where(ce => ce.CourseId == courseId.Value);
-            }
-
-            var enrolments = await query.ToListAsync();
-
-            ViewData["Courses"] = facultyProfile.AssignedCourses;
-            ViewData["SelectedCourseId"] = courseId;
-
-            return View(enrolments);
+            ViewBag.SelectedCourseId = courseId.Value;
+            return View(assignmentResults);
         }
 
-        public async Task<IActionResult> Gradebook(int? courseId)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
-
-            var facultyProfile = await _context.FacultyProfiles
-                .Include(f => f.AssignedCourses)
-                .FirstOrDefaultAsync(f => f.IdentityUserId == currentUser.Id);
-
-            if (facultyProfile == null)
-            {
-                return NotFound("Faculty profile not found.");
-            }
-
-            var courseIds = facultyProfile.AssignedCourses.Select(c => c.Id).ToList();
-
-            if (courseId.HasValue && !courseIds.Contains(courseId.Value))
-            {
-                return Forbid();
-            }
-
-            var query = _context.Assignments
-                .Include(a => a.Course)
-                .Include(a => a.Results)
-                    .ThenInclude(r => r.StudentProfile)
-                .Where(a => courseIds.Contains(a.CourseId));
-
-            if (courseId.HasValue)
-            {
-                query = query.Where(a => a.CourseId == courseId.Value);
-            }
-
-            var assignments = await query.ToListAsync();
-
-            ViewData["Courses"] = facultyProfile.AssignedCourses;
-            ViewData["SelectedCourseId"] = courseId;
-
-            return View(assignments);
-        }
+        return View(new List<College.Domain.AssignmentResult>());
     }
 }

@@ -1,19 +1,10 @@
-using System.ComponentModel.DataAnnotations;
+namespace College.Domain;
 
-namespace College.Domain
+public class Branch
 {
-    public class Branch
-    {
-        public int Id { get; set; }
-
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(200)]
-        public string Address { get; set; } = string.Empty;
-
-        public ICollection<Course> Courses { get; set; } = new List<Course>();
-    }
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    
+    public ICollection<Course> Courses { get; set; } = new List<Course>();
 }

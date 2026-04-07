@@ -1,0 +1,35 @@
+@model IEnumerable<College.Domain.Assignment>
+
+@{
+    ViewData["Title"] = "Assignments";
+}
+
+<h1>Assignments</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Assignment</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Course</th>
+            <th>Title</th>
+            <th>Max Score</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.Course.Name</td>
+            <td>@item.Title</td>
+            <td>@item.MaxScore</td>
+            <td>@item.DueDate.ToShortDateString()</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

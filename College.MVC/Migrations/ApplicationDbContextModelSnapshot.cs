@@ -15,44 +15,27 @@ namespace College.MVC.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
-            modelBuilder.Entity("CourseFacultyProfile", b =>
-                {
-                    b.Property<int>("AssignedCoursesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FacultyMembersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AssignedCoursesId", "FacultyMembersId");
-
-                    b.HasIndex("FacultyMembersId");
-
-                    b.ToTable("CourseFacultyProfile");
-                });
-
-            modelBuilder.Entity("Library.Domain.Assignment", b =>
+            modelBuilder.Entity("College.Domain.Assignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("MaxScore")
-                        .HasColumnType("int");
+                    b.Property<decimal>("MaxScore")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -61,25 +44,26 @@ namespace College.MVC.Migrations
                     b.ToTable("Assignments");
                 });
 
-            modelBuilder.Entity("Library.Domain.AssignmentResult", b =>
+            modelBuilder.Entity("College.Domain.AssignmentResult", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("AssignmentId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("StudentProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("SubmittedDate")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -90,23 +74,23 @@ namespace College.MVC.Migrations
                     b.ToTable("AssignmentResults");
                 });
 
-            modelBuilder.Entity("Library.Domain.AttendanceRecord", b =>
+            modelBuilder.Entity("College.Domain.AttendanceRecord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("CourseEnrolmentId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("Present")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("WeekNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -115,73 +99,76 @@ namespace College.MVC.Migrations
                     b.ToTable("AttendanceRecords");
                 });
 
-            modelBuilder.Entity("Library.Domain.Branch", b =>
+            modelBuilder.Entity("College.Domain.Branch", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Branches");
                 });
 
-            modelBuilder.Entity("Library.Domain.Course", b =>
+            modelBuilder.Entity("College.Domain.Course", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("BranchId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("FacultyProfileId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BranchId");
 
+                    b.HasIndex("FacultyProfileId");
+
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("Library.Domain.CourseEnrolment", b =>
+            modelBuilder.Entity("College.Domain.CourseEnrolment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("EnrolDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("StudentProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -192,28 +179,28 @@ namespace College.MVC.Migrations
                     b.ToTable("CourseEnrolments");
                 });
 
-            modelBuilder.Entity("Library.Domain.Exam", b =>
+            modelBuilder.Entity("College.Domain.Exam", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("MaxScore")
-                        .HasColumnType("int");
+                    b.Property<decimal>("MaxScore")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("ResultsReleased")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -222,25 +209,24 @@ namespace College.MVC.Migrations
                     b.ToTable("Exams");
                 });
 
-            modelBuilder.Entity("Library.Domain.ExamResult", b =>
+            modelBuilder.Entity("College.Domain.ExamResult", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ExamId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Grade")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                        .HasMaxLength(5)
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("StudentProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -251,84 +237,67 @@ namespace College.MVC.Migrations
                     b.ToTable("ExamResults");
                 });
 
-            modelBuilder.Entity("Library.Domain.FacultyProfile", b =>
+            modelBuilder.Entity("College.Domain.FacultyProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("IdentityUserId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IdentityUserId")
-                        .IsUnique();
 
                     b.ToTable("FacultyProfiles");
                 });
 
-            modelBuilder.Entity("Library.Domain.StudentProfile", b =>
+            modelBuilder.Entity("College.Domain.StudentProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("IdentityUserId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("StudentNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IdentityUserId")
-                        .IsUnique();
-
-                    b.HasIndex("StudentNumber")
-                        .IsUnique();
 
                     b.ToTable("StudentProfiles");
                 });
@@ -336,19 +305,19 @@ namespace College.MVC.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -363,17 +332,17 @@ namespace College.MVC.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -385,54 +354,54 @@ namespace College.MVC.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetime");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -450,17 +419,17 @@ namespace College.MVC.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -473,18 +442,18 @@ namespace College.MVC.Migrations
                 {
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderKey")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -496,10 +465,10 @@ namespace College.MVC.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -511,62 +480,47 @@ namespace College.MVC.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CourseFacultyProfile", b =>
+            modelBuilder.Entity("College.Domain.Assignment", b =>
                 {
-                    b.HasOne("Library.Domain.Course", null)
-                        .WithMany()
-                        .HasForeignKey("AssignedCoursesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Library.Domain.FacultyProfile", null)
-                        .WithMany()
-                        .HasForeignKey("FacultyMembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Library.Domain.Assignment", b =>
-                {
-                    b.HasOne("Library.Domain.Course", "Course")
+                    b.HasOne("College.Domain.Course", "Course")
                         .WithMany("Assignments")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("Library.Domain.AssignmentResult", b =>
+            modelBuilder.Entity("College.Domain.AssignmentResult", b =>
                 {
-                    b.HasOne("Library.Domain.Assignment", "Assignment")
+                    b.HasOne("College.Domain.Assignment", "Assignment")
                         .WithMany("Results")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Domain.StudentProfile", "StudentProfile")
+                    b.HasOne("College.Domain.StudentProfile", "StudentProfile")
                         .WithMany("AssignmentResults")
                         .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Assignment");
@@ -574,9 +528,9 @@ namespace College.MVC.Migrations
                     b.Navigation("StudentProfile");
                 });
 
-            modelBuilder.Entity("Library.Domain.AttendanceRecord", b =>
+            modelBuilder.Entity("College.Domain.AttendanceRecord", b =>
                 {
-                    b.HasOne("Library.Domain.CourseEnrolment", "CourseEnrolment")
+                    b.HasOne("College.Domain.CourseEnrolment", "CourseEnrolment")
                         .WithMany("AttendanceRecords")
                         .HasForeignKey("CourseEnrolmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -585,29 +539,36 @@ namespace College.MVC.Migrations
                     b.Navigation("CourseEnrolment");
                 });
 
-            modelBuilder.Entity("Library.Domain.Course", b =>
+            modelBuilder.Entity("College.Domain.Course", b =>
                 {
-                    b.HasOne("Library.Domain.Branch", "Branch")
+                    b.HasOne("College.Domain.Branch", "Branch")
                         .WithMany("Courses")
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("College.Domain.FacultyProfile", "Faculty")
+                        .WithMany("Courses")
+                        .HasForeignKey("FacultyProfileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Branch");
+
+                    b.Navigation("Faculty");
                 });
 
-            modelBuilder.Entity("Library.Domain.CourseEnrolment", b =>
+            modelBuilder.Entity("College.Domain.CourseEnrolment", b =>
                 {
-                    b.HasOne("Library.Domain.Course", "Course")
+                    b.HasOne("College.Domain.Course", "Course")
                         .WithMany("Enrolments")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Domain.StudentProfile", "StudentProfile")
+                    b.HasOne("College.Domain.StudentProfile", "StudentProfile")
                         .WithMany("Enrolments")
                         .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Course");
@@ -615,29 +576,29 @@ namespace College.MVC.Migrations
                     b.Navigation("StudentProfile");
                 });
 
-            modelBuilder.Entity("Library.Domain.Exam", b =>
+            modelBuilder.Entity("College.Domain.Exam", b =>
                 {
-                    b.HasOne("Library.Domain.Course", "Course")
+                    b.HasOne("College.Domain.Course", "Course")
                         .WithMany("Exams")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("Library.Domain.ExamResult", b =>
+            modelBuilder.Entity("College.Domain.ExamResult", b =>
                 {
-                    b.HasOne("Library.Domain.Exam", "Exam")
+                    b.HasOne("College.Domain.Exam", "Exam")
                         .WithMany("Results")
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Domain.StudentProfile", "StudentProfile")
+                    b.HasOne("College.Domain.StudentProfile", "StudentProfile")
                         .WithMany("ExamResults")
                         .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Exam");
@@ -696,17 +657,17 @@ namespace College.MVC.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Library.Domain.Assignment", b =>
+            modelBuilder.Entity("College.Domain.Assignment", b =>
                 {
                     b.Navigation("Results");
                 });
 
-            modelBuilder.Entity("Library.Domain.Branch", b =>
+            modelBuilder.Entity("College.Domain.Branch", b =>
                 {
                     b.Navigation("Courses");
                 });
 
-            modelBuilder.Entity("Library.Domain.Course", b =>
+            modelBuilder.Entity("College.Domain.Course", b =>
                 {
                     b.Navigation("Assignments");
 
@@ -715,17 +676,22 @@ namespace College.MVC.Migrations
                     b.Navigation("Exams");
                 });
 
-            modelBuilder.Entity("Library.Domain.CourseEnrolment", b =>
+            modelBuilder.Entity("College.Domain.CourseEnrolment", b =>
                 {
                     b.Navigation("AttendanceRecords");
                 });
 
-            modelBuilder.Entity("Library.Domain.Exam", b =>
+            modelBuilder.Entity("College.Domain.Exam", b =>
                 {
                     b.Navigation("Results");
                 });
 
-            modelBuilder.Entity("Library.Domain.StudentProfile", b =>
+            modelBuilder.Entity("College.Domain.FacultyProfile", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("College.Domain.StudentProfile", b =>
                 {
                     b.Navigation("AssignmentResults");
 

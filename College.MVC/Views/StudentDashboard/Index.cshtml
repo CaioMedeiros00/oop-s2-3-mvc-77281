@@ -1,0 +1,43 @@
+@model College.Domain.StudentProfile
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<h1>Welcome, @Model.Name!</h1>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>My Profile</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Student Number:</strong> @Model.StudentNumber</p>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Phone:</strong> @Model.Phone</p>
+                <p><strong>Date of Birth:</strong> @Model.DateOfBirth?.ToShortDateString()</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Links</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a asp-action="Enrolments" class="btn btn-link">My Courses</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-action="Grades" class="btn btn-link">My Grades</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-action="Attendance" class="btn btn-link">My Attendance</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

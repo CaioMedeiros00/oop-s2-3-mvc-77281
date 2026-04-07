@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "My Grades";
+    var assignmentResults = ViewBag.AssignmentResults as IEnumerable<College.Domain.AssignmentResult> ?? Enumerable.Empty<College.Domain.AssignmentResult>();
+    var examResults = ViewBag.ExamResults as IEnumerable<College.Domain.ExamResult> ?? Enumerable.Empty<College.Domain.ExamResult>();
+}
+
+<h1>My Grades</h1>
+
+<h2>Assignment Results</h2>
+@if (assignmentResults.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Assignment</th>
+                <th>Score</th>
+                <th>Max Score</th>
+                <th>Percentage</th>
+                <th>Feedback</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in assignmentResults)
+            {
+                <tr>
+                    <td>@result.Assignment.Course.Name</td>
+                    <td>@result.Assignment.Title</td>
+                    <td>@result.Score</td>
+                    <td>@result.Assignment.MaxScore</td>
+                    <td>@((result.Score / result.Assignment.MaxScore * 100).ToString("F1"))%</td>
+                    <td>@result.Feedback</td>
+                    <td>@result.SubmittedDate?.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No assignment results yet.</p>
+}
+
+<h2 class="mt-4">Exam Results (Released Only)</h2>
+@if (examResults.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Exam</th>
+                <th>Score</th>
+                <th>Max Score</th>
+                <th>Grade</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in examResults)
+            {
+                <tr>
+                    <td>@result.Exam.Course.Name</td>
+                    <td>@result.Exam.Title</td>
+                    <td>@result.Score</td>
+                    <td>@result.Exam.MaxScore</td>
+                    <td>@result.Grade</td>
+                    <td>@((result.Score / result.Exam.MaxScore * 100).ToString("F1"))%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No released exam results yet.</p>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>

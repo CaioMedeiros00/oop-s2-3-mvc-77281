@@ -5,102 +5,118 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace College.MVC.Controllers
+namespace College.MVC.Controllers;
+
+[Authorize(Roles = "Admin")]
+public class EnrolmentsController : Controller
 {
-    [Authorize(Roles = "Admin")]
-    public class EnrolmentsController : Controller
+    private readonly ApplicationDbContext _context;
+
+    public EnrolmentsController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public EnrolmentsController(ApplicationDbContext context)
+    public async Task<IActionResult> Index()
+    {
+        var enrolments = await _context.CourseEnrolments
+            .Include(e => e.Course)
+            .Include(e => e.StudentProfile)
+            .ToListAsync();
+        return View(enrolments);
+    }
+
+    public IActionResult Create()
+    {
+        ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Name");
+        ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "Name");
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,StudentProfileId,CourseId,EnrolDate,Status")] CourseEnrolment courseEnrolment)
+    {
+        if (ModelState.IsValid)
         {
-            _context = context;
+            _context.Add(courseEnrolment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
+        ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Name", courseEnrolment.CourseId);
+        ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "Name", courseEnrolment.StudentProfileId);
+        return View(courseEnrolment);
+    }
 
-        public async Task<IActionResult> Index()
-        {
-            var enrolments = await _context.CourseEnrolments
-                .Include(e => e.StudentProfile)
-                .Include(e => e.Course)
-                    .ThenInclude(c => c.Branch)
-                .ToListAsync();
-            return View(enrolments);
-        }
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
 
-        public async Task<IActionResult> Create()
-        {
-            ViewData["StudentProfileId"] = new SelectList(
-                await _context.StudentProfiles.ToListAsync(),
-                "Id",
-                "Name"
-            );
-            ViewData["CourseId"] = new SelectList(
-                await _context.Courses.ToListAsync(),
-                "Id",
-                "Name"
-            );
-            return View();
-        }
+        var courseEnrolment = await _context.CourseEnrolments.FindAsync(id);
+        if (courseEnrolment == null) return NotFound();
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CourseEnrolment enrolment)
+        ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Name", courseEnrolment.CourseId);
+        ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "Name", courseEnrolment.StudentProfileId);
+        return View(courseEnrolment);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,StudentProfileId,CourseId,EnrolDate,Status")] CourseEnrolment courseEnrolment)
+    {
+        if (id != courseEnrolment.Id) return NotFound();
+
+        if (ModelState.IsValid)
         {
-            if (ModelState.IsValid)
+            try
             {
-                enrolment.EnrolDate = DateTime.Now;
-                _context.CourseEnrolments.Add(enrolment);
+                _context.Update(courseEnrolment);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Enrolment created successfully.";
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["StudentProfileId"] = new SelectList(
-                await _context.StudentProfiles.ToListAsync(),
-                "Id",
-                "Name",
-                enrolment.StudentProfileId
-            );
-            ViewData["CourseId"] = new SelectList(
-                await _context.Courses.ToListAsync(),
-                "Id",
-                "Name",
-                enrolment.CourseId
-            );
-            return View(enrolment);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+            catch (DbUpdateConcurrencyException)
             {
-                return NotFound();
-            }
-
-            var enrolment = await _context.CourseEnrolments
-                .Include(e => e.StudentProfile)
-                .Include(e => e.Course)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (enrolment == null)
-            {
-                return NotFound();
-            }
-
-            return View(enrolment);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var enrolment = await _context.CourseEnrolments.FindAsync(id);
-            if (enrolment != null)
-            {
-                _context.CourseEnrolments.Remove(enrolment);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Enrolment deleted successfully.";
+                if (!CourseEnrolmentExists(courseEnrolment.Id))
+                    return NotFound();
+                else
+                    throw;
             }
             return RedirectToAction(nameof(Index));
         }
+        ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Name", courseEnrolment.CourseId);
+        ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "Name", courseEnrolment.StudentProfileId);
+        return View(courseEnrolment);
+    }
+
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var courseEnrolment = await _context.CourseEnrolments
+            .Include(c => c.Course)
+            .Include(c => c.StudentProfile)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (courseEnrolment == null) return NotFound();
+
+        return View(courseEnrolment);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var courseEnrolment = await _context.CourseEnrolments.FindAsync(id);
+        if (courseEnrolment != null)
+        {
+            _context.CourseEnrolments.Remove(courseEnrolment);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool CourseEnrolmentExists(int id)
+    {
+        return _context.CourseEnrolments.Any(e => e.Id == id);
     }
 }

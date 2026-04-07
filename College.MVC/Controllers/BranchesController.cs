@@ -2,130 +2,120 @@ using College.Domain;
 using College.MVC.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace College.MVC.Controllers
+namespace College.MVC.Controllers;
+
+[Authorize(Roles = "Admin")]
+public class BranchesController : Controller
 {
-    [Authorize(Roles = "Admin")]
-    public class BranchesController : Controller
+    private readonly ApplicationDbContext _context;
+
+    public BranchesController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public BranchesController(ApplicationDbContext context)
+    public async Task<IActionResult> Index()
+    {
+        return View(await _context.Branches.ToListAsync());
+    }
+
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var branch = await _context.Branches
+            .Include(b => b.Courses)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (branch == null) return NotFound();
+
+        return View(branch);
+    }
+
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,Name,Address")] Branch branch)
+    {
+        if (ModelState.IsValid)
         {
-            _context = context;
+            _context.Add(branch);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
+        return View(branch);
+    }
 
-        public async Task<IActionResult> Index()
-        {
-            var branches = await _context.Branches
-                .Include(b => b.Courses)
-                .ToListAsync();
-            return View(branches);
-        }
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+        var branch = await _context.Branches.FindAsync(id);
+        if (branch == null) return NotFound();
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Branch branch)
+        return View(branch);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Address")] Branch branch)
+    {
+        if (id != branch.Id) return NotFound();
+
+        if (ModelState.IsValid)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Branches.Add(branch);
+                _context.Update(branch);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Branch created successfully.";
-                return RedirectToAction(nameof(Index));
             }
-            return View(branch);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
+            catch (DbUpdateConcurrencyException)
             {
-                return NotFound();
-            }
-
-            var branch = await _context.Branches.FindAsync(id);
-            if (branch == null)
-            {
-                return NotFound();
-            }
-            return View(branch);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Branch branch)
-        {
-            if (id != branch.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(branch);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Branch updated successfully.";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BranchExists(branch.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(branch);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var branch = await _context.Branches
-                .Include(b => b.Courses)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (branch == null)
-            {
-                return NotFound();
-            }
-
-            return View(branch);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var branch = await _context.Branches.FindAsync(id);
-            if (branch != null)
-            {
-                _context.Branches.Remove(branch);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Branch deleted successfully.";
+                if (!BranchExists(branch.Id))
+                    return NotFound();
+                else
+                    throw;
             }
             return RedirectToAction(nameof(Index));
         }
+        return View(branch);
+    }
 
-        private bool BranchExists(int id)
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var branch = await _context.Branches
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (branch == null) return NotFound();
+
+        return View(branch);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var branch = await _context.Branches.FindAsync(id);
+        if (branch != null)
         {
-            return _context.Branches.Any(e => e.Id == id);
+            _context.Branches.Remove(branch);
         }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool BranchExists(int id)
+    {
+        return _context.Branches.Any(e => e.Id == id);
     }
 }

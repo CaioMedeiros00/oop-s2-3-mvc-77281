@@ -1,8 +1,287 @@
-﻿@{
+@model HomeViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-4">
+    <h1 class="display-4">Welcome to Acme Global College</h1>
+    @if (Model.IsAuthenticated)
+    {
+        <p class="lead">Hello, @Model.UserName! Here's your personalized dashboard.</p>
+    }
+    else
+    {
+        <p class="lead">Your gateway to quality education across Ireland</p>
+    }
 </div>
+
+@if (Model.UserRole == "Student")
+{
+    <!-- Student Dashboard -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-primary">
+                <div class="card-body">
+                    <h2 class="text-primary">@(Model.ActiveEnrolments ?? 0)</h2>
+                    <p class="text-muted mb-0">Active Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-warning">
+                <div class="card-body">
+                    <h2 class="text-warning">@(Model.PendingAssignments ?? 0)</h2>
+                    <p class="text-muted mb-0">Pending Assignments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-info">
+                <div class="card-body">
+                    <h2 class="text-info">@(Model.UpcomingExams ?? 0)</h2>
+                    <p class="text-muted mb-0">Upcoming Exams</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-success">
+                <div class="card-body">
+                    <h2 class="text-success">@(Model.AverageGrade?.ToString("F2") ?? "N/A")</h2>
+                    <p class="text-muted mb-0">Average Grade</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="StudentDashboard" asp-action="Index" class="btn btn-primary">View My Dashboard</a>
+                        <a asp-controller="StudentDashboard" asp-action="Enrolments" class="btn btn-outline-primary">My Courses</a>
+                        <a asp-controller="StudentDashboard" asp-action="Grades" class="btn btn-outline-primary">View Grades</a>
+                        <a asp-controller="StudentDashboard" asp-action="Attendance" class="btn btn-outline-primary">Check Attendance</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Important Reminders</h5>
+                    @if ((Model.PendingAssignments ?? 0) > 0)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <strong>⚠️ You have @Model.PendingAssignments pending assignment(s)</strong><br/>
+                            Don't forget to submit them before the deadline!
+                        </div>
+                    }
+                    @if ((Model.UpcomingExams ?? 0) > 0)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <strong>📚 You have @Model.UpcomingExams upcoming exam(s)</strong><br/>
+                            Make sure to prepare well!
+                        </div>
+                    }
+                    @if ((Model.PendingAssignments ?? 0) == 0 && (Model.UpcomingExams ?? 0) == 0)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <strong>✅ All caught up!</strong><br/>
+                            You have no pending tasks at the moment.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.UserRole == "Faculty")
+{
+    <!-- Faculty Dashboard -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm border-primary">
+                <div class="card-body">
+                    <h2 class="text-primary">@(Model.CoursesTeaching ?? 0)</h2>
+                    <p class="text-muted mb-0">Courses Teaching</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm border-success">
+                <div class="card-body">
+                    <h2 class="text-success">@(Model.TotalStudents ?? 0)</h2>
+                    <p class="text-muted mb-0">Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm border-warning">
+                <div class="card-body">
+                    <h2 class="text-warning">@(Model.AssignmentsToGrade ?? 0)</h2>
+                    <p class="text-muted mb-0">Assignments to Grade</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="FacultyDashboard" asp-action="Index" class="btn btn-primary">View My Dashboard</a>
+                        <a asp-controller="FacultyDashboard" asp-action="MyCourses" class="btn btn-outline-primary">My Courses</a>
+                        <a asp-controller="FacultyDashboard" asp-action="Students" class="btn btn-outline-primary">My Students</a>
+                        <a asp-controller="FacultyDashboard" asp-action="Gradebook" class="btn btn-outline-primary">Gradebook</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Important Reminders</h5>
+                    @if ((Model.AssignmentsToGrade ?? 0) > 0)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <strong>📝 You have @Model.AssignmentsToGrade assignment(s) to grade</strong><br/>
+                            Students are waiting for their feedback!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <strong>✅ All assignments graded!</strong><br/>
+                            Great job keeping up with grading.
+                        </div>
+                    }
+                    <div class="alert alert-info" role="alert">
+                        <strong>💡 Tip:</strong> Keep your course materials updated regularly to enhance student learning.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.UserRole == "Admin")
+{
+    <!-- Admin Dashboard -->
+    <div class="row mt-4">
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm border-primary">
+                <div class="card-body">
+                    <h3 class="text-primary">@(Model.TotalBranches ?? 0)</h3>
+                    <p class="text-muted mb-0 small">Branches</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm border-info">
+                <div class="card-body">
+                    <h3 class="text-info">@(Model.TotalCourses ?? 0)</h3>
+                    <p class="text-muted mb-0 small">Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-success">
+                <div class="card-body">
+                    <h3 class="text-success">@(Model.TotalStudentsInSystem ?? 0)</h3>
+                    <p class="text-muted mb-0 small">Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm border-warning">
+                <div class="card-body">
+                    <h3 class="text-warning">@(Model.TotalFaculty ?? 0)</h3>
+                    <p class="text-muted mb-0 small">Faculty</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm border-danger">
+                <div class="card-body">
+                    <h3 class="text-danger">@(Model.TotalEnrolments ?? 0)</h3>
+                    <p class="text-muted mb-0 small">Enrolments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Management Tools</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Branches" asp-action="Index" class="btn btn-primary">Manage Branches</a>
+                        <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-primary">Manage Courses</a>
+                        <a asp-controller="Enrolments" asp-action="Index" class="btn btn-outline-primary">Manage Enrolments</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Academic Management</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Assignments" asp-action="Index" class="btn btn-outline-success">Manage Assignments</a>
+                        <a asp-controller="Exams" asp-action="Index" class="btn btn-outline-success">Manage Exams</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Our Branches</h3>
+                <p class="card-text">Acme Global College operates three campuses across Ireland:</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="border-start border-primary border-4 ps-3 mb-3">
+                            <h5>Dublin Campus</h5>
+                            <p class="text-muted mb-0">123 O'Connell Street<br/>Dublin 1</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border-start border-success border-4 ps-3 mb-3">
+                            <h5>Cork Campus</h5>
+                            <p class="text-muted mb-0">45 Patrick Street<br/>Cork</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border-start border-info border-4 ps-3 mb-3">
+                            <h5>Galway Campus</h5>
+                            <p class="text-muted mb-0">78 Shop Street<br/>Galway</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.IsAuthenticated)
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Ready to get started?</h5>
+                    <p class="card-text">Login to access your personalized dashboard and all college resources.</p>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg">Login Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

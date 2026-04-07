@@ -5,118 +5,101 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace College.MVC.Controllers
+namespace College.MVC.Controllers;
+
+[Authorize(Roles = "Student")]
+public class StudentDashboardController : Controller
 {
-    [Authorize(Roles = "Student")]
-    public class StudentDashboardController : Controller
+    private readonly ApplicationDbContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
+
+    public StudentDashboardController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        _context = context;
+        _userManager = userManager;
+    }
 
-        public StudentDashboardController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public async Task<IActionResult> Index()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.IdentityUserId == user.Id);
+
+        if (studentProfile == null)
         {
-            _context = context;
-            _userManager = userManager;
+            return NotFound("Student profile not found.");
         }
 
-        public async Task<IActionResult> Index()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+        return View(studentProfile);
+    }
 
-            var studentProfile = await _context.StudentProfiles
-                .Include(s => s.Enrolments)
-                    .ThenInclude(e => e.Course)
-                        .ThenInclude(c => c.Branch)
-                .FirstOrDefaultAsync(s => s.IdentityUserId == currentUser.Id);
+    public async Task<IActionResult> Enrolments()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
 
-            if (studentProfile == null)
-            {
-                return NotFound("Student profile not found.");
-            }
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.IdentityUserId == user.Id);
 
-            return View(studentProfile);
-        }
+        if (studentProfile == null) return NotFound();
 
-        public async Task<IActionResult> Enrolments()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+        var enrolments = await _context.CourseEnrolments
+            .Include(e => e.Course)
+            .ThenInclude(c => c.Branch)
+            .Where(e => e.StudentProfileId == studentProfile.Id)
+            .ToListAsync();
 
-            var studentProfile = await _context.StudentProfiles
-                .Include(s => s.Enrolments)
-                    .ThenInclude(e => e.Course)
-                        .ThenInclude(c => c.Branch)
-                .Include(s => s.Enrolments)
-                    .ThenInclude(e => e.AttendanceRecords)
-                .FirstOrDefaultAsync(s => s.IdentityUserId == currentUser.Id);
+        return View(enrolments);
+    }
 
-            if (studentProfile == null)
-            {
-                return NotFound("Student profile not found.");
-            }
+    public async Task<IActionResult> Attendance()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
 
-            return View(studentProfile.Enrolments);
-        }
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.IdentityUserId == user.Id);
 
-        public async Task<IActionResult> Grades()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+        if (studentProfile == null) return NotFound();
 
-            var studentProfile = await _context.StudentProfiles
-                .Include(s => s.AssignmentResults)
-                    .ThenInclude(ar => ar.Assignment)
-                        .ThenInclude(a => a.Course)
-                .Include(s => s.ExamResults)
-                    .ThenInclude(er => er.Exam)
-                        .ThenInclude(e => e.Course)
-                .FirstOrDefaultAsync(s => s.IdentityUserId == currentUser.Id);
+        var attendanceRecords = await _context.AttendanceRecords
+            .Include(a => a.CourseEnrolment)
+            .ThenInclude(e => e.Course)
+            .Where(a => a.CourseEnrolment.StudentProfileId == studentProfile.Id)
+            .OrderByDescending(a => a.Date)
+            .ToListAsync();
 
-            if (studentProfile == null)
-            {
-                return NotFound("Student profile not found.");
-            }
+        return View(attendanceRecords);
+    }
 
-            // Filter exam results to only show released results
-            ViewData["AssignmentResults"] = studentProfile.AssignmentResults;
-            ViewData["ExamResults"] = studentProfile.ExamResults
-                .Where(er => er.Exam.ResultsReleased)
-                .ToList();
+    public async Task<IActionResult> Grades()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
 
-            return View(studentProfile);
-        }
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.IdentityUserId == user.Id);
 
-        public async Task<IActionResult> Attendance()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+        if (studentProfile == null) return NotFound();
 
-            var studentProfile = await _context.StudentProfiles
-                .Include(s => s.Enrolments)
-                    .ThenInclude(e => e.Course)
-                .Include(s => s.Enrolments)
-                    .ThenInclude(e => e.AttendanceRecords)
-                .FirstOrDefaultAsync(s => s.IdentityUserId == currentUser.Id);
+        var assignmentResults = await _context.AssignmentResults
+            .Include(r => r.Assignment)
+            .ThenInclude(a => a.Course)
+            .Where(r => r.StudentProfileId == studentProfile.Id)
+            .ToListAsync();
 
-            if (studentProfile == null)
-            {
-                return NotFound("Student profile not found.");
-            }
+        // Only include released exam results
+        var examResults = await _context.ExamResults
+            .Include(r => r.Exam)
+            .ThenInclude(e => e.Course)
+            .Where(r => r.StudentProfileId == studentProfile.Id && r.Exam.ResultsReleased)
+            .ToListAsync();
 
-            return View(studentProfile.Enrolments);
-        }
+        ViewBag.AssignmentResults = assignmentResults;
+        ViewBag.ExamResults = examResults;
+
+        return View();
     }
 }

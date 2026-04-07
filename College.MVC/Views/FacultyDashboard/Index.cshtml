@@ -1,0 +1,41 @@
+@model College.Domain.FacultyProfile
+
+@{
+    ViewData["Title"] = "Faculty Dashboard";
+}
+
+<h1>Welcome, @Model.Name!</h1>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>My Profile</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Phone:</strong> @Model.Phone</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Links</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a asp-action="MyCourses" class="btn btn-link">My Courses</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-action="Students" class="btn btn-link">My Students</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-action="Gradebook" class="btn btn-link">Gradebook</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
