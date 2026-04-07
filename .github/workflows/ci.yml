@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     - name: Restore
-      run: dotnet restore
+      run: dotnet restore College.Domain/College.Domain.csproj && dotnet restore College.MVC/College.MVC.csproj && dotnet restore College.Tests/College.Tests.csproj
     - name: Build (Release)
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build College.Domain/College.Domain.csproj --configuration Release --no-restore && dotnet build College.MVC/College.MVC.csproj --configuration Release --no-restore && dotnet build College.Tests/College.Tests.csproj --configuration Release --no-restore
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
+      run: dotnet test College.Tests/College.Tests.csproj --configuration Release --no-build --verbosity normal
