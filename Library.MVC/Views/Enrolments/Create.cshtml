@@ -1,0 +1,75 @@
+@model College.Domain.CourseEnrolment
+
+@{
+    ViewData["Title"] = "Create Enrolment";
+    var students = ViewBag.Students as IEnumerable<College.Domain.StudentProfile>;
+    var courses = ViewBag.Courses as IEnumerable<College.Domain.Course>;
+}
+
+<div class="container mt-4">
+    <h2>Create New Enrolment</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="mb-3">
+                    <label asp-for="StudentProfileId" class="form-label">Student</label>
+                    <select asp-for="StudentProfileId" class="form-select">
+                        <option value="">-- Select Student --</option>
+                        @if (students != null)
+                        {
+                            @foreach (var student in students)
+                            {
+                                <option value="@student.Id">@student.Name (@student.StudentNumber)</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="StudentProfileId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CourseId" class="form-label">Course</label>
+                    <select asp-for="CourseId" class="form-select">
+                        <option value="">-- Select Course --</option>
+                        @if (courses != null)
+                        {
+                            @foreach (var course in courses)
+                            {
+                                <option value="@course.Id">@course.Name - @course.Branch?.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="CourseId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EnrolDate" class="form-label"></label>
+                    <input asp-for="EnrolDate" type="date" class="form-control" />
+                    <span asp-validation-for="EnrolDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Withdrawn">Withdrawn</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,24 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace College.Domain
+{
+    public class Course
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public string Name { get; set; } = string.Empty;
+
+        public int BranchId { get; set; }
+        public Branch Branch { get; set; } = null!;
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public ICollection<CourseEnrolment> Enrolments { get; set; } = new List<CourseEnrolment>();
+        public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+        public ICollection<Exam> Exams { get; set; } = new List<Exam>();
+        public ICollection<FacultyProfile> FacultyMembers { get; set; } = new List<FacultyProfile>();
+    }
+}

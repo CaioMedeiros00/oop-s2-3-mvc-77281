@@ -1,0 +1,77 @@
+@model IEnumerable<College.Domain.AttendanceRecord>
+
+@{
+    ViewData["Title"] = "My Attendance";
+}
+
+<div class="container mt-4">
+    <h2>My Attendance Records</h2>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No attendance records found.
+        </div>
+    }
+    else
+    {
+        var groupedByEnrolment = Model.GroupBy(a => a.CourseEnrolment);
+        
+        @foreach (var group in groupedByEnrolment)
+        {
+            var enrolment = group.Key;
+            var totalRecords = group.Count();
+            var presentRecords = group.Count(a => a.Present);
+            var attendanceRate = (presentRecords * 100.0) / totalRecords;
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4>@enrolment.Course.Name</h4>
+                    <p class="mb-0">
+                        Overall Attendance: 
+                        <span class="badge @(attendanceRate >= 80 ? "bg-success" : "bg-warning")">
+                            @presentRecords/@totalRecords (@attendanceRate.ToString("F1")%)
+                        </span>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Week</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in group.OrderBy(a => a.WeekNumber))
+                                {
+                                    <tr>
+                                        <td>Week @record.WeekNumber</td>
+                                        <td>@record.Date.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @if (record.Present)
+                                            {
+                                                <span class="badge bg-success">Present</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Absent</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>

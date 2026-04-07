@@ -1,0 +1,68 @@
+@model IEnumerable<College.Domain.CourseEnrolment>
+
+@{
+    ViewData["Title"] = "My Enrolments";
+}
+
+<div class="container mt-4">
+    <h2>My Enrolments</h2>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You are not currently enrolled in any courses.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var enrolment in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5>@enrolment.Course.Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Branch</dt>
+                                <dd class="col-sm-8">@enrolment.Course.Branch?.Name</dd>
+
+                                <dt class="col-sm-4">Enrol Date</dt>
+                                <dd class="col-sm-8">@enrolment.EnrolDate.ToString("dd/MM/yyyy")</dd>
+
+                                <dt class="col-sm-4">Status</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-success">@enrolment.Status</span>
+                                </dd>
+
+                                <dt class="col-sm-4">Course Period</dt>
+                                <dd class="col-sm-8">
+                                    @enrolment.Course.StartDate.ToString("dd/MM/yyyy") - 
+                                    @enrolment.Course.EndDate.ToString("dd/MM/yyyy")
+                                </dd>
+
+                                <dt class="col-sm-4">Attendance</dt>
+                                <dd class="col-sm-8">
+                                    @{
+                                        var totalRecords = enrolment.AttendanceRecords.Count;
+                                        var presentRecords = enrolment.AttendanceRecords.Count(a => a.Present);
+                                        var attendanceRate = totalRecords > 0 ? (presentRecords * 100.0 / totalRecords) : 0;
+                                    }
+                                    <span class="badge @(attendanceRate >= 80 ? "bg-success" : "bg-warning")">
+                                        @presentRecords/@totalRecords (@attendanceRate.ToString("F1")%)
+                                    </span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
